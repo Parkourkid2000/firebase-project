@@ -1,5 +1,14 @@
 import { auth, db } from "./firebase/init";
-import { collection, addDoc, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  getDocs,
+  getDoc,
+  doc,
+  query,
+  where,
+  updateDoc,
+} from "firebase/firestore";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -17,16 +26,50 @@ function App() {
 
   function createPost() {
     const post = {
-      title: "complete Frontend Bootcamp",
-      description: "finish projects ",
+      title: "Finish  borderlands 4",
+      description: "finish Steaming Era ",
+      uid: user.uid,
     };
     addDoc(collection(db, "posts"), post);
   }
 
   async function getAllPosts() {
-    const {docs} = await getDocs(collection(db, "posts"));
-    const posts = docs.map(elem =>({...elem.data(), id: elem.id }));
+    const { docs } = await getDocs(collection(db, "posts"));
+    const posts = docs.map((elem) => ({ ...elem.data(), id: elem.id }));
     console.log(posts);
+  }
+
+  async function getPostById(id) {
+    const postRef = doc(db, "posts", id);
+    const postSnap = getDoc(postRef);
+    return postSnap.data();
+  }
+
+  async function updatePost() {
+    const hardcodedId = "6MAlsj0v28WxE7wa6Ivz";
+    const postRef = await doc(db, "posts", hardcodedId);
+    const post = await getPostById(hardcodedId);
+    console.log(post);
+    const newPost = {
+      ...post,
+      description: "eifbrifu3333333",
+    };
+    updateDoc(postRef, newPost);
+  }
+
+  function deletePost() {
+    const hardcodedId = "6MAlsj0v28WxE7wa6Ivz";
+    const postRef = doc(db, "posts", hardcodedId);
+    deletePost(postRef);
+  }
+
+  async function getPostByUid() {
+    const postCollectionRef = await query(
+      collection(db, "posts"),
+      where("uid", "==", "V5Oa9nFHrdaqoVhYM9dVR7o5PEn1")
+    );
+    const { docs } = await getDoc(postCollectionRef);
+    console.log(docs.map((doc) => doc.data()));
   }
 
   React.useEffect(() => {
@@ -63,8 +106,6 @@ function App() {
     setUser({});
   }
 
-  function isLoggedIn() {}
-
   return (
     <div className="App">
       <div className="btn__container">
@@ -76,6 +117,10 @@ function App() {
           <button onClick={logout}>{user.email}</button>
           <button onClick={createPost}>Create Post</button>
           <button onClick={getAllPosts}>Get All Posts</button>
+          <button onClick={getPostById}>Get Post by Id</button>
+          <button onClick={getPostByUid}>Get Post by Uid</button>
+          <button onClick={updatePost}>Update Post</button>
+          <button onClick={deletePost}>Delete Post</button>
         </div>
       </div>
       {/* {loading ? "loading..." : user.email} */}
